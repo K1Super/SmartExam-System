@@ -16,8 +16,10 @@ public class UserController {
     private UserService userService;
     
     @GetMapping
-    public Result<List<User>> findAll() {
-        List<User> users = userService.findAll();
+    public Result<List<User>> findAll(
+            @RequestParam(required = false) Long clazzId,
+            @RequestParam(required = false) Integer role) {
+        List<User> users = userService.findByConditions(clazzId, role);
         return Result.success("获取用户列表成功", users);
     }
     
@@ -50,5 +52,11 @@ public class UserController {
     public Result<Void> delete(@PathVariable Long id) {
         userService.delete(id);
         return Result.success("删除用户成功");
+    }
+    
+    @PostMapping("/reset-student-passwords")
+    public Result<Void> resetStudentPasswords() {
+        userService.resetAllStudentPasswords();
+        return Result.success("重置所有学生密码成功，默认密码为123456");
     }
 }

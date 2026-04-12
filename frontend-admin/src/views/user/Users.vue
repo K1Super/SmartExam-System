@@ -1,28 +1,25 @@
 <template>
   <div class="users-container">
     <el-card class="users-card">
-      <template #header>
-        <div class="card-header">
-          <span>用户管理</span>
+      <div class="search-toolbar">
+        <div class="search-left">
+          <el-input v-model="searchKeyword" placeholder="请输入姓名" style="width: 300px; margin-right: 10px;"></el-input>
+          <el-select v-model="roleFilter" placeholder="选择角色" style="width: 150px; margin-right: 10px;">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="管理员" :value="1"></el-option>
+            <el-option label="教师" :value="2"></el-option>
+            <el-option label="学生" :value="3"></el-option>
+          </el-select>
+          <el-button type="primary" @click="handleSearch">搜索</el-button>
+        </div>
+        <div class="search-right">
           <el-button type="primary" @click="handleAddUser">添加用户</el-button>
         </div>
-      </template>
-      <div class="users-search">
-        <el-input v-model="searchKeyword" placeholder="请输入用户名" style="width: 300px; margin-right: 10px;"></el-input>
-        <el-select v-model="roleFilter" placeholder="选择角色" style="width: 150px; margin-right: 10px;">
-          <el-option label="全部" value=""></el-option>
-          <el-option label="管理员" value="1"></el-option>
-          <el-option label="教师" value="2"></el-option>
-          <el-option label="学生" value="3"></el-option>
-        </el-select>
-        <el-button type="primary" @click="handleSearch">搜索</el-button>
       </div>
       <el-table :data="usersList" style="width: 100%">
-        <el-table-column prop="id" label="ID" width="80"></el-table-column>
-        <el-table-column prop="username" label="用户名"></el-table-column>
-        <el-table-column prop="realName" label="真实姓名"></el-table-column>
-        <el-table-column prop="email" label="邮箱"></el-table-column>
-        <el-table-column prop="phone" label="手机号"></el-table-column>
+        <el-table-column type="index" label="序号" width="80"></el-table-column>
+        <el-table-column prop="realName" label="姓名"></el-table-column>
+        <el-table-column prop="phone" label="学号"></el-table-column>
         <el-table-column prop="role" label="角色">
           <template #default="scope">
             <span v-if="scope.row.role === 1">管理员</span>
@@ -32,7 +29,7 @@
         </el-table-column>
         <el-table-column prop="status" label="状态">
           <template #default="scope">
-            <el-switch v-model="scope.row.status" @change="handleStatusChange(scope.row)"></el-switch>
+            <el-switch v-model="scope.row.status" :active-value="1" :inactive-value="0" @change="handleStatusChange(scope.row)"></el-switch>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="150">
@@ -46,46 +43,37 @@
         <el-pagination
           v-model:current-page="currentPage"
           v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
+          layout="prev, pager, next"
           :total="total"
-          @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
         ></el-pagination>
       </div>
     </el-card>
 
-    <!-- 添加/编辑用户对话框 -->
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="500px"
+      width="450px"
     >
-      <el-form :model="userForm" :rules="rules" ref="userFormRef" label-width="80px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="userForm.username" placeholder="请输入用户名"></el-input>
+      <el-form :model="userForm" :rules="rules" ref="userFormRef" label-width="70px">
+        <el-form-item label="姓名" prop="realName">
+          <el-input v-model="userForm.realName" placeholder="请输入姓名"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="password" v-if="!userForm.id">
-          <el-input v-model="userForm.password" type="password" placeholder="请输入密码"></el-input>
-        </el-form-item>
-        <el-form-item label="真实姓名" prop="realName">
-          <el-input v-model="userForm.realName" placeholder="请输入真实姓名"></el-input>
-        </el-form-item>
-        <el-form-item label="邮箱" prop="email">
-          <el-input v-model="userForm.email" placeholder="请输入邮箱"></el-input>
-        </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="userForm.phone" placeholder="请输入手机号"></el-input>
+        <el-form-item label="学号" prop="phone">
+          <el-input v-model="userForm.phone" placeholder="请输入学号"></el-input>
         </el-form-item>
         <el-form-item label="角色" prop="role">
-          <el-select v-model="userForm.role" placeholder="请选择角色">
-            <el-option label="管理员" value="1"></el-option>
-            <el-option label="教师" value="2"></el-option>
-            <el-option label="学生" value="3"></el-option>
+          <el-select v-model="userForm.role" placeholder="请选择角色" style="width: 100%;" @change="handleRoleChange">
+            <el-option label="管理员" :value="1"></el-option>
+            <el-option label="教师" :value="2"></el-option>
+            <el-option label="学生" :value="3"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="userForm.password" type="password" placeholder="请输入密码，学生默认123456"></el-input>
+        </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-switch v-model="userForm.status"></el-switch>
+          <el-switch v-model="userForm.status" :active-value="1" :inactive-value="0"></el-switch>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -118,28 +106,20 @@ const userForm = ref({
   username: '',
   password: '',
   realName: '',
-  email: '',
   phone: '',
-  role: 3,
+  role: null,
   status: 1
 })
 
 const rules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+  realName: [
+    { required: true, message: '请输入姓名', trigger: 'blur' }
+  ],
+  phone: [
+    { required: true, message: '请输入学号', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' }
-  ],
-  realName: [
-    { required: true, message: '请输入真实姓名', trigger: 'blur' }
-  ],
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱格式', trigger: 'blur' }
-  ],
-  phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' }
   ],
   role: [
     { required: true, message: '请选择角色', trigger: 'change' }
@@ -163,7 +143,6 @@ const fetchUsers = async () => {
 }
 
 const handleSearch = () => {
-  // 这里可以添加搜索逻辑
   fetchUsers()
 }
 
@@ -184,17 +163,26 @@ const handleAddUser = () => {
     username: '',
     password: '',
     realName: '',
-    email: '',
     phone: '',
-    role: 3,
+    role: null,
     status: 1
   }
   dialogVisible.value = true
 }
 
+const handleRoleChange = (role) => {
+  if (role === 3) {
+    userForm.value.password = '123456'
+  }
+}
+
 const handleEditUser = (user) => {
   dialogTitle.value = '编辑用户'
-  userForm.value = { ...user }
+  userForm.value = { 
+    ...user,
+    role: Number(user.role),
+    status: user.status ? 1 : 0
+  }
   dialogVisible.value = true
 }
 
@@ -204,11 +192,19 @@ const handleSubmit = async () => {
   await userFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
+        const formData = { 
+          ...userForm.value,
+          username: userForm.value.phone,
+          role: Number(userForm.value.role)
+        }
+        delete formData.createTime
+        delete formData.updateTime
+        
         let response
         if (userForm.value.id) {
-          response = await api.put(`/users/${userForm.value.id}`, userForm.value)
+          response = await api.put(`/users/${userForm.value.id}`, formData)
         } else {
-          response = await api.post('/users', userForm.value)
+          response = await api.post('/users', formData)
         }
         if (response.code === 200) {
           ElMessage.success(userForm.value.id ? '更新用户成功' : '添加用户成功')
@@ -240,19 +236,29 @@ const handleDeleteUser = async (id) => {
       ElMessage.error(response.message)
     }
   } catch (error) {
-    // 用户取消删除
   }
 }
 
 const handleStatusChange = async (user) => {
   try {
-    const response = await api.put(`/users/${user.id}`, user)
+    const updateData = {
+      id: user.id,
+      status: user.status,
+      username: user.username,
+      realName: user.realName,
+      phone: user.phone,
+      role: user.role
+    }
+    delete updateData.createTime
+    delete updateData.updateTime
+    
+    const response = await api.put(`/users/${user.id}`, updateData)
     if (response.code !== 200) {
-      user.status = !user.status
+      user.status = user.status === 1 ? 0 : 1
       ElMessage.error('更新状态失败')
     }
   } catch (error) {
-    user.status = !user.status
+    user.status = user.status === 1 ? 0 : 1
     ElMessage.error('更新状态失败')
   }
 }
@@ -260,11 +266,12 @@ const handleStatusChange = async (user) => {
 
 <style scoped>
 .users-container {
-  padding: 20px;
+  padding: 0;
 }
 
-.users-card {
-  margin-bottom: 20px;
+:deep(.users-card) {
+  border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .card-header {
@@ -273,8 +280,45 @@ const handleStatusChange = async (user) => {
   align-items: center;
 }
 
-.users-search {
+.search-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
+}
+
+:deep(.el-button--primary) {
+  background: #1a1a1a !important;
+  border-color: #1a1a1a !important;
+  color: #fff !important;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-button--primary:hover) {
+  background: #404040 !important;
+  border-color: #404040 !important;
+}
+
+:deep(.el-button--danger) {
+  background: #fff !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+  color: #1a1a1a !important;
+  transition: all 0.3s ease;
+}
+
+:deep(.el-button--danger:hover) {
+  background: #f5f5f5 !important;
+  border-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+:deep(.el-switch.is-checked .el-switch__core) {
+  background-color: #606060 !important;
+  border-color: #606060 !important;
+}
+
+.search-left {
+  display: flex;
+  align-items: center;
 }
 
 .pagination {

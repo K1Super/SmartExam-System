@@ -1,89 +1,122 @@
 <template>
-  <div class="app-container">
-    <el-container style="height: 100vh">
-      <el-header height="60px" class="header">
-        <div class="logo">SmartExam 考试系统</div>
-        <div class="user-info">
-          <span class="user-name">{{ user?.realName || '考生' }}</span>
-          <el-button type="primary" size="small" @click="handleLogout" style="margin-left: 20px;">退出登录</el-button>
-        </div>
-      </el-header>
-      <el-main class="main-content">
-        <router-view v-slot="{ Component }">
-          <transition name="fade" mode="out-in">
-            <component :is="Component" />
-          </transition>
-        </router-view>
-      </el-main>
-    </el-container>
-  </div>
+  <router-view />
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-const user = ref(null)
-
-const handleLogout = () => {
-  localStorage.removeItem('token')
-  router.push('/login')
-}
-
-// 检查登录状态
-const checkLogin = () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    router.push('/login')
-  }
-}
-
-checkLogin()
 </script>
 
-<style scoped>
-.app-container {
-  width: 100%;
-  height: 100vh;
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.header {
-  background-color: #409EFF;
-  color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+body {
+  font-family: Arial, sans-serif;
 }
 
-.logo {
-  font-size: 20px;
-  font-weight: bold;
+body:not(.login-page) .el-button--primary {
+  background-color: #ffffff !important;
+  border-color: #d0d0d0 !important;
+  color: #333333 !important;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
+body:not(.login-page) .el-button--primary:hover {
+  background-color: #f8f8f8 !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
 }
 
-.user-name {
-  margin-right: 20px;
+body:not(.login-page) .el-button--primary:active {
+  background-color: #f0f0f0 !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
 }
 
-.main-content {
-  padding: 20px;
-  background-color: #f0f2f5;
+body:not(.login-page) .el-button--success {
+  background-color: #ffffff !important;
+  border-color: #b0b0b0 !important;
+  color: #555555 !important;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+body:not(.login-page) .el-button--success:hover {
+  background-color: #fafafa !important;
+  border-color: #555555 !important;
+  color: #555555 !important;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+body:not(.login-page) .el-button--warning {
+  background-color: #ffffff !important;
+  border-color: #c0c0c0 !important;
+  color: #666666 !important;
+}
+
+body:not(.login-page) .el-button--warning:hover {
+  background-color: #fafafa !important;
+  border-color: #666666 !important;
+  color: #666666 !important;
+}
+
+body:not(.login-page) .el-button--danger {
+  background-color: #ffffff !important;
+  border-color: #d0d0d0 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--danger:hover {
+  background-color: #f8f8f8 !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--info {
+  background-color: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  color: #666666 !important;
+}
+
+body:not(.login-page) .el-button--info:hover {
+  background-color: #ffffff !important;
+  border-color: #666666 !important;
+  color: #666666 !important;
+}
+
+body:not(.login-page) .el-button--default {
+  background-color: #ffffff !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--default:hover {
+  background-color: #fafafa !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-width: 1px;
+}
+
+body:not(.login-page) .el-button:focus {
+  outline: none;
+}
+
+body:not(.login-page) .el-button.is-plain {
+  background-color: #ffffff !important;
+}
+
+body:not(.login-page) .el-button--primary.is-plain {
+  color: #333333 !important;
+  border-color: #d0d0d0 !important;
+}
+
+body:not(.login-page) .el-button--primary.is-plain:hover {
+  background-color: #f8f8f8 !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
 }
 </style>

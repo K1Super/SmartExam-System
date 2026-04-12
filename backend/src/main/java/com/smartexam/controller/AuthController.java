@@ -20,8 +20,17 @@ public class AuthController {
         String username = loginData.get("username");
         String password = loginData.get("password");
         
-        Map<String, Object> result = authService.login(username, password);
-        return Result.success("登录成功", result);
+        System.out.println("\n>>> 登录请求: username=" + username);
+        
+        try {
+            Map<String, Object> result = authService.login(username, password);
+            System.out.println(">>> 登录成功");
+            return Result.success("登录成功", result);
+        } catch (Exception e) {
+            System.out.println(">>> 登录失败: " + e.getMessage());
+            e.printStackTrace();
+            return Result.error(e.getMessage());
+        }
     }
     
     @PostMapping("/register")

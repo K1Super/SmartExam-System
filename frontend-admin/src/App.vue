@@ -1,164 +1,186 @@
 <template>
-  <div class="app-container">
-    <el-container style="height: 100vh">
-      <el-header height="60px" class="header">
-        <div class="logo">SmartExam</div>
-        <div class="user-info">
-          <el-dropdown>
-            <span class="user-name">{{ user?.realName || '管理员' }}</span>
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item @click="handleLogout">退出登录</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </div>
-      </el-header>
-      <el-container>
-        <el-aside width="200px" class="sidebar">
-          <el-menu
-            :default-active="activeMenu"
-            class="sidebar-menu"
-            router
-          >
-            <el-menu-item index="/dashboard">
-              <el-icon><House /></el-icon>
-              <span>仪表盘</span>
-            </el-menu-item>
-            <el-sub-menu index="user">
-              <template #title>
-                <el-icon><User /></el-icon>
-                <span>用户管理</span>
-              </template>
-              <el-menu-item index="/users">用户列表</el-menu-item>
-            </el-sub-menu>
-            <el-sub-menu index="question">
-              <template #title>
-                <el-icon><Document /></el-icon>
-                <span>题库管理</span>
-              </template>
-              <el-menu-item index="/questions">题目列表</el-menu-item>
-              <el-menu-item index="/subjects">科目管理</el-menu-item>
-            </el-sub-menu>
-            <el-sub-menu index="exam">
-              <template #title>
-                <el-icon><DataAnalysis /></el-icon>
-                <span>考试管理</span>
-              </template>
-              <el-menu-item index="/exam-papers">试卷管理</el-menu-item>
-              <el-menu-item index="/exams">考试管理</el-menu-item>
-            </el-sub-menu>
-            <el-sub-menu index="grading">
-              <template #title>
-                <el-icon><Check /></el-icon>
-                <span>阅卷管理</span>
-              </template>
-              <el-menu-item index="/grading">自动阅卷</el-menu-item>
-              <el-menu-item index="/manual-grading">手动阅卷</el-menu-item>
-            </el-sub-menu>
-            <el-sub-menu index="statistics">
-              <template #title>
-                <el-icon><TrendCharts /></el-icon>
-                <span>成绩统计</span>
-              </template>
-              <el-menu-item index="/score-statistics">成绩分析</el-menu-item>
-            </el-sub-menu>
-          </el-menu>
-        </el-aside>
-        <el-main class="main-content">
-          <router-view v-slot="{ Component }">
-            <transition name="fade" mode="out-in">
-              <component :is="Component" />
-            </transition>
-          </router-view>
-        </el-main>
-      </el-container>
-    </el-container>
-  </div>
+  <router-view />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { House, User, Document, DataAnalysis, Check, TrendCharts } from '@element-plus/icons-vue'
-
-const router = useRouter()
-const route = useRoute()
-const user = ref(null)
-
-const activeMenu = computed(() => {
-  return route.path
-})
-
-const handleLogout = () => {
-  localStorage.removeItem('token')
-  router.push('/login')
-}
-
-// 检查登录状态
-const checkLogin = () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    router.push('/login')
-  }
-}
-
-checkLogin()
 </script>
 
-<style scoped>
-.app-container {
-  width: 100%;
-  height: 100vh;
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.header {
-  background-color: #409EFF;
-  color: white;
+body {
+  font-family: Arial, sans-serif;
+}
+
+body:not(.login-page) .el-button--primary {
+  background-color: #ffffff !important;
+  border-color: #d0d0d0 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--primary:hover {
+  background-color: #f8f8f8 !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--primary:active {
+  background-color: #f0f0f0 !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--success {
+  background-color: #ffffff !important;
+  border-color: #b0b0b0 !important;
+  color: #555555 !important;
+}
+
+body:not(.login-page) .el-button--success:hover {
+  background-color: #fafafa !important;
+  border-color: #555555 !important;
+  color: #555555 !important;
+}
+
+body:not(.login-page) .el-button--warning {
+  background-color: #ffffff !important;
+  border-color: #c0c0c0 !important;
+  color: #666666 !important;
+}
+
+body:not(.login-page) .el-button--warning:hover {
+  background-color: #fafafa !important;
+  border-color: #666666 !important;
+  color: #666666 !important;
+}
+
+body:not(.login-page) .el-button--danger {
+  background-color: #ffffff !important;
+  border-color: #d0d0d0 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--danger:hover {
+  background-color: #f8f8f8 !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--info {
+  background-color: #f5f5f5 !important;
+  border-color: #e0e0e0 !important;
+  color: #666666 !important;
+}
+
+body:not(.login-page) .el-button--info:hover {
+  background-color: #ffffff !important;
+  border-color: #666666 !important;
+  color: #666666 !important;
+}
+
+body:not(.login-page) .el-button--default {
+  background-color: #ffffff !important;
+  border-color: #e0e0e0 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button--default:hover {
+  background-color: #fafafa !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
+}
+
+body:not(.login-page) .el-button {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border-width: 1px;
+}
+
+body:not(.login-page) .el-button:focus {
+  outline: none;
+}
+
+body:not(.login-page) .el-button.is-plain {
+  background-color: #ffffff !important;
+}
+
+body:not(.login-page) .el-button--primary.is-plain {
+  color: #333333 !important;
+  border-color: #d0d0d0 !important;
+}
+
+body:not(.login-page) .el-button--primary.is-plain:hover {
+  background-color: #f8f8f8 !important;
+  border-color: #333333 !important;
+  color: #333333 !important;
+}
+
+.el-pagination {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  justify-content: flex-end;
+  padding: 10px 0;
 }
 
-.logo {
-  font-size: 20px;
-  font-weight: bold;
+
+
+.el-pagination .el-pager li {
+  margin: 0 2px;
+  padding: 0 8px;
+  min-width: 32px;
+  height: 32px;
+  line-height: 32px;
+  font-size: 14px;
+  color: #606266;
+  border-radius: 4px;
+  background-color: transparent;
+  border: none;
+  transition: all 0.2s ease;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-}
-
-.user-name {
-  cursor: pointer;
-  padding: 0 10px;
-}
-
-.sidebar {
+.el-pagination .el-pager li.is-active {
   background-color: #f5f7fa;
-  border-right: 1px solid #e4e7ed;
+  color: #303133;
+  font-weight: 500;
 }
 
-.sidebar-menu {
-  height: 100%;
-  border-right: none;
+.el-pagination .el-pager li:not(.is-active):not(.disabled):hover {
+  color: #303133;
+  background-color: #f5f7fa;
 }
 
-.main-content {
-  padding: 20px;
-  background-color: #f0f2f5;
+.el-pagination .btn-prev,
+.el-pagination .btn-next {
+  min-width: 32px;
+  height: 32px;
+  line-height: 32px;
+  font-size: 14px;
+  color: #606266;
+  border-radius: 4px;
+  background-color: transparent;
+  border: none;
+  margin: 0 2px;
+  transition: all 0.2s ease;
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
+.el-pagination .btn-prev:not(.disabled):hover,
+.el-pagination .btn-next:not(.disabled):hover {
+  color: #303133;
+  background-color: #f5f7fa;
 }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+.el-pagination button:disabled {
+  color: #c0c4cc;
+  background-color: transparent;
+  cursor: not-allowed;
+}
+
+.el-pagination .more-el-icon {
+  color: #909399;
 }
 </style>

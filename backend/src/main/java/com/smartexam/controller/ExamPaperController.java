@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/exam-papers")
@@ -52,15 +53,28 @@ public class ExamPaperController {
         return Result.success("更新试卷成功", updatedExamPaper);
     }
     
-    @PutMapping("/{id}/publish")
-    public Result<ExamPaper> publish(@PathVariable Long id) {
-        ExamPaper publishedExamPaper = examPaperService.publish(id);
-        return Result.success("发布试卷成功", publishedExamPaper);
-    }
-    
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         examPaperService.delete(id);
         return Result.success("删除试卷成功");
+    }
+    
+    @PostMapping("/{id}/questions")
+    public Result<Void> addQuestions(@PathVariable Long id, @RequestBody Map<String, List<Long>> request) {
+        List<Long> questionIds = request.get("questionIds");
+        examPaperService.addQuestions(id, questionIds);
+        return Result.success("添加题目成功");
+    }
+    
+    @GetMapping("/{id}/questions")
+    public Result<List<Long>> getQuestions(@PathVariable Long id) {
+        List<Long> questionIds = examPaperService.getQuestions(id);
+        return Result.success("获取试卷题目成功", questionIds);
+    }
+    
+    @DeleteMapping("/{id}/questions/{questionId}")
+    public Result<Void> removeQuestion(@PathVariable Long id, @PathVariable Long questionId) {
+        examPaperService.removeQuestion(id, questionId);
+        return Result.success("移除题目成功");
     }
 }

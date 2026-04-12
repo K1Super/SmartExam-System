@@ -22,6 +22,8 @@ public class User {
     
     private Integer role;
     
+    private Long clazzId;
+    
     private Integer status;
     
     @TableField(fill = FieldFill.INSERT)

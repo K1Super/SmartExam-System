@@ -1,12 +1,17 @@
 spring:
   application:
     name: smartexam-backend
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/smartexam?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/smart_exam?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: root
+    password: 666666
     druid:
       initial-size: 5
       min-idle: 5
@@ -64,7 +69,7 @@ server:
     context-path: /api
 
 jwt:
-  secret: smartexam-secret-key-2024
+  secret: smartexam-secret-key-2024-very-long-secret-key-for-jwt-token-generation
   expiration: 86400000
 
 logging:

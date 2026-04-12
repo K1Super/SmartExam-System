@@ -9,7 +9,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('../App.vue'),
+    component: () => import('../components/Layout.vue'),
     children: [
       {
         path: 'exams',
@@ -30,6 +30,11 @@ const routes = [
         path: 'results',
         name: 'Results',
         component: () => import('../views/Results.vue')
+      },
+      {
+        path: 'exam-result/:recordId',
+        name: 'ExamResult',
+        component: () => import('../views/ExamResult.vue')
       }
     ]
   }
@@ -43,7 +48,17 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   if (to.path === '/login') {
-    next()
+    if (token) {
+      next('/exams')
+    } else {
+      next()
+    }
+  } else if (to.path === '/') {
+    if (token) {
+      next('/exams')
+    } else {
+      next('/login')
+    }
   } else {
     if (token) {
       next()

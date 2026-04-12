@@ -1,14 +1,14 @@
 <template>
   <div class="subjects-container">
     <el-card class="subjects-card">
-      <template #header>
-        <div class="card-header">
-          <span>科目管理</span>
+      <div class="search-toolbar">
+        <div class="search-left"></div>
+        <div class="search-right">
           <el-button type="primary" @click="handleAddSubject">添加科目</el-button>
         </div>
-      </template>
+      </div>
       <el-table :data="subjectsList" style="width: 100%">
-        <el-table-column prop="id" label="ID" width="80"></el-table-column>
+        <el-table-column type="index" label="序号" width="80"></el-table-column>
         <el-table-column prop="name" label="科目名称"></el-table-column>
         <el-table-column prop="code" label="科目代码"></el-table-column>
         <el-table-column prop="description" label="科目描述" show-overflow-tooltip></el-table-column>
@@ -20,6 +20,31 @@
         </el-table-column>
       </el-table>
     </el-card>
+
+    <!-- 添加/编辑科目对话框 -->
+    <el-dialog
+      v-model="dialogVisible"
+      :title="dialogTitle"
+      width="500px"
+    >
+      <el-form :model="subjectForm" :rules="rules" ref="subjectFormRef" label-width="80px">
+        <el-form-item label="科目名称" prop="name">
+          <el-input v-model="subjectForm.name" placeholder="请输入科目名称"></el-input>
+        </el-form-item>
+        <el-form-item label="科目代码" prop="code">
+          <el-input v-model="subjectForm.code" placeholder="请输入科目代码"></el-input>
+        </el-form-item>
+        <el-form-item label="科目描述" prop="description">
+          <el-input v-model="subjectForm.description" type="textarea" :rows="2" placeholder="请输入科目描述"></el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleSubmit">确定</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -29,6 +54,25 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '../../api'
 
 const subjectsList = ref([])
+
+const dialogVisible = ref(false)
+const dialogTitle = ref('添加科目')
+const subjectFormRef = ref(null)
+const subjectForm = ref({
+  id: null,
+  name: '',
+  code: '',
+  description: ''
+})
+
+const rules = {
+  name: [
+    { required: true, message: '请输入科目名称', trigger: 'blur' }
+  ],
+  code: [
+    { required: true, message: '请输入科目代码', trigger: 'blur' }
+  ]
+}
 
 onMounted(() => {
   fetchSubjects()
@@ -46,13 +90,46 @@ const fetchSubjects = async () => {
 }
 
 const handleAddSubject = () => {
-  // 添加科目逻辑
-  console.log('添加科目')
+  dialogTitle.value = '添加科目'
+  subjectForm.value = {
+    id: null,
+    name: '',
+    code: '',
+    description: ''
+  }
+  dialogVisible.value = true
 }
 
 const handleEditSubject = (subject) => {
-  // 编辑科目逻辑
-  console.log('编辑科目', subject)
+  dialogTitle.value = '编辑科目'
+  subjectForm.value = { ...subject }
+  dialogVisible.value = true
+}
+
+const handleSubmit = async () => {
+  if (!subjectFormRef.value) return
+  
+  await subjectFormRef.value.validate(async (valid) => {
+    if (valid) {
+      try {
+        let response
+        if (subjectForm.value.id) {
+          response = await api.put(`/subjects/${subjectForm.value.id}`, subjectForm.value)
+        } else {
+          response = await api.post('/subjects', subjectForm.value)
+        }
+        if (response.code === 200) {
+          ElMessage.success(subjectForm.value.id ? '更新科目成功' : '添加科目成功')
+          dialogVisible.value = false
+          fetchSubjects()
+        } else {
+          ElMessage.error(response.message)
+        }
+      } catch (error) {
+        ElMessage.error('操作失败')
+      }
+    }
+  })
 }
 
 const handleDeleteSubject = async (id) => {
@@ -85,9 +162,10 @@ const handleDeleteSubject = async (id) => {
   margin-bottom: 20px;
 }
 
-.card-header {
+.search-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 </style>

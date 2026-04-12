@@ -69,4 +69,10 @@ public class ExamController {
         examService.updateExamStatus();
         return Result.success("更新考试状态成功");
     }
+    
+    @PostMapping("/{id}/publish")
+    public Result<Void> publishExam(@PathVariable Long id) {
+        examService.publishExam(id);
+        return Result.success("考试发布成功");
+    }
 }

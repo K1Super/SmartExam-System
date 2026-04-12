@@ -2,7 +2,6 @@ package com.smartexam.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -13,9 +12,14 @@ public class Exam {
     
     private String title;
     
+    @TableField(exist = false)
+    private String examTitle;
+    
     private Long paperId;
     
     private Long subjectId;
+    
+    private String clazzIds;
     
     private LocalDateTime startTime;
     
@@ -26,6 +30,8 @@ public class Exam {
     private Integer status;
     
     private Long creatorId;
+    
+    private String description;
     
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

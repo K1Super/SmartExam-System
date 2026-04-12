@@ -8,18 +8,24 @@ const routes = [
   },
   {
     path: '/',
-    name: 'Home',
-    component: () => import('../App.vue'),
+    name: 'Layout',
+    component: () => import('../components/Layout.vue'),
+    redirect: '/welcome',
     children: [
       {
-        path: 'dashboard',
-        name: 'Dashboard',
-        component: () => import('../views/Dashboard.vue')
+        path: '/welcome',
+        name: 'Welcome',
+        component: () => import('../views/Welcome.vue')
       },
       {
         path: 'users',
         name: 'Users',
         component: () => import('../views/user/Users.vue')
+      },
+      {
+        path: 'clazz',
+        name: 'Clazz',
+        component: () => import('../views/user/ClazzManagement.vue')
       },
       {
         path: 'questions',
@@ -51,11 +57,7 @@ const routes = [
         name: 'ManualGrading',
         component: () => import('../views/grading/ManualGrading.vue')
       },
-      {
-        path: 'score-statistics',
-        name: 'ScoreStatistics',
-        component: () => import('../views/statistics/ScoreStatistics.vue')
-      }
+      { path: 'score-statistics', name: 'ScoreStatistics', component: () => import('../views/statistics/ScoreStatistics.vue') }
     ]
   }
 ]

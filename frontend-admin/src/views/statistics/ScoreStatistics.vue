@@ -48,12 +48,34 @@
         </el-row>
         
         <div class="chart-container">
-          <el-card class="chart-card">
-            <template #header>
-              <span>成绩分布</span>
-            </template>
-            <div ref="scoreChartRef" class="chart"></div>
-          </el-card>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-card class="chart-card">
+                <template #header>
+                  <span>成绩分布</span>
+                </template>
+                <div ref="scoreChartRef" class="chart"></div>
+              </el-card>
+            </el-col>
+            <el-col :span="12">
+              <el-card class="chart-card">
+                <template #header>
+                  <span>成绩占比</span>
+                </template>
+                <div ref="scorePieChartRef" class="chart"></div>
+              </el-card>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20" style="margin-top: 20px;">
+            <el-col :span="24">
+              <el-card class="chart-card">
+                <template #header>
+                  <span>成绩概况</span>
+                </template>
+                <div ref="scoreTrendChartRef" class="chart"></div>
+              </el-card>
+            </el-col>
+          </el-row>
         </div>
       </div>
       <div v-else class="empty">
@@ -64,7 +86,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import api from '../../api'
@@ -72,10 +94,25 @@ import api from '../../api'
 const examId = ref('')
 const exams = ref([])
 const statistics = ref(null)
+const distribution = ref(null)
+const clazzStatistics = ref([])
 const scoreChartRef = ref(null)
+const scorePieChartRef = ref(null)
+const scoreTrendChartRef = ref(null)
+let scoreChart = null
+let scorePieChart = null
+let scoreTrendChart = null
 
 onMounted(() => {
   fetchExams()
+  window.addEventListener('resize', handleResize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  if (scoreChart) scoreChart.dispose()
+  if (scorePieChart) scorePieChart.dispose()
+  if (scoreTrendChart) scoreTrendChart.dispose()
 })
 
 const fetchExams = async () => {
@@ -96,22 +133,49 @@ const handleGenerateStatistics = async () => {
   }
   
   try {
-    const response = await api.post(`/statistics/generate/${examId.value}`)
-    if (response.code === 200) {
-      statistics.value = response.data
-      initScoreChart()
-    } else {
-      ElMessage.error(response.message)
-    }
+    const [statsResponse, distResponse, clazzResponse] = await Promise.all([
+      api.post(`/statistics/generate/${examId.value}`),
+      api.get(`/statistics/distribution/${examId.value}`),
+      api.get(`/statistics/clazz/${examId.value}`)
+    ])
+    
+    if (statsResponse.code === 200) statistics.value = statsResponse.data
+    if (distResponse.code === 200) distribution.value = distResponse.data
+    if (clazzResponse.code === 200) clazzStatistics.value = clazzResponse.data
+    
+    await nextTick()
+    initCharts()
+    
+    ElMessage.success('统计报告生成成功')
   } catch (error) {
-    ElMessage.error('生成统计失败')
+    console.error('生成统计失败详情:', error)
+    ElMessage.error('生成统计失败，请确保考试已有学生提交答卷')
   }
+}
+
+const initCharts = () => {
+  initScoreChart()
+  initScorePieChart()
+  initScoreTrendChart()
 }
 
 const initScoreChart = () => {
   if (!scoreChartRef.value) return
   
-  const chart = echarts.init(scoreChartRef.value)
+  if (scoreChart) {
+    scoreChart.dispose()
+  }
+  
+  scoreChart = echarts.init(scoreChartRef.value)
+  
+  const dist = distribution.value || {
+    range0_60: 0,
+    range60_70: 0,
+    range70_80: 0,
+    range80_90: 0,
+    range90_100: 0
+  }
+  
   const option = {
     tooltip: {
       trigger: 'axis',
@@ -134,7 +198,13 @@ const initScoreChart = () => {
     },
     series: [
       {
-        data: [10, 15, 20, 12, 8],
+        data: [
+          dist.range0_60,
+          dist.range60_70,
+          dist.range70_80,
+          dist.range80_90,
+          dist.range90_100
+        ],
         type: 'bar',
         itemStyle: {
           color: '#409EFF'
@@ -142,7 +212,122 @@ const initScoreChart = () => {
       }
     ]
   }
-  chart.setOption(option)
+  scoreChart.setOption(option)
+}
+
+const initScorePieChart = () => {
+  if (!scorePieChartRef.value) return
+  
+  if (scorePieChart) {
+    scorePieChart.dispose()
+  }
+  
+  scorePieChart = echarts.init(scorePieChartRef.value)
+  
+  const dist = distribution.value || {
+    range0_60: 0,
+    range60_70: 0,
+    range70_80: 0,
+    range80_90: 0,
+    range90_100: 0
+  }
+  
+  const option = {
+    tooltip: {
+      trigger: 'item'
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left'
+    },
+    series: [
+      {
+        name: '成绩分布',
+        type: 'pie',
+        radius: '60%',
+        data: [
+          { value: dist.range0_60, name: '0-60' },
+          { value: dist.range60_70, name: '60-70' },
+          { value: dist.range70_80, name: '70-80' },
+          { value: dist.range80_90, name: '80-90' },
+          { value: dist.range90_100, name: '90-100' }
+        ],
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        }
+      }
+    ]
+  }
+  scorePieChart.setOption(option)
+}
+
+const initScoreTrendChart = () => {
+  if (!scoreTrendChartRef.value) return
+  
+  if (scoreTrendChart) {
+    scoreTrendChart.dispose()
+  }
+  
+  scoreTrendChart = echarts.init(scoreTrendChartRef.value)
+  
+  const stats = statistics.value || {
+    avgScore: 0,
+    maxScore: 0,
+    minScore: 0
+  }
+  
+  const option = {
+    tooltip: {
+      trigger: 'axis'
+    },
+    legend: {
+      data: ['平均分', '最高分', '最低分']
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: ['本次考试']
+    },
+    yAxis: {
+      type: 'value',
+      min: 0,
+      max: 100
+    },
+    series: [
+      {
+        name: '平均分',
+        type: 'line',
+        data: [stats.avgScore || 0]
+      },
+      {
+        name: '最高分',
+        type: 'line',
+        data: [stats.maxScore || 0]
+      },
+      {
+        name: '最低分',
+        type: 'line',
+        data: [stats.minScore || 0]
+      }
+    ]
+  }
+  scoreTrendChart.setOption(option)
+}
+
+const handleResize = () => {
+  if (scoreChart) scoreChart.resize()
+  if (scorePieChart) scorePieChart.resize()
+  if (scoreTrendChart) scoreTrendChart.resize()
 }
 </script>
 
@@ -192,11 +377,13 @@ const initScoreChart = () => {
 }
 
 .chart-container {
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .chart-card {
-  height: 400px;
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+  box-shadow: none;
 }
 
 .chart {
